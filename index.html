@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>乐普单位换算计算器</title>
+    <title>乐普菲克 · 单位换算计算器</title>
     <style>
         :root {
             --primary: #2563eb;
@@ -61,16 +61,16 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 6px;
-            padding-bottom: 2px;
+            gap: 14px; /* 增加了 Logo 和标题的间距 */
+            padding-bottom: 6px;
         }
         .logo-img {
-            height: 44px;
+            height: 48px; /* 放大了 Logo 的高度 */
             object-fit: contain;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.06));
         }
         .app-title {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: 700;
             color: var(--text);
             letter-spacing: -0.2px;
@@ -308,7 +308,7 @@
         <!-- Logo + 名称 -->
         <div class="header">
             <img class="logo-img" src="https://md2card.cn/img/screenshots/1781756783204_aiqkck_clipboard-image.png" alt="乐普logo">
-            <div class="app-title">乐普单位换算计算器</div>
+            <div class="app-title">乐普菲克 · 单位换算计算器</div>
         </div>
 
         <!-- 模式切换：单组分/双组分 -->
@@ -425,9 +425,6 @@
                 { name: '磅 (lb)', value: 'lb', factor: 453.59237 }
             ];
 
-            // 根据单位自动计算合适的小数位数：
-            // 基准精度设定为 0.01（克 或 毫升），再按该单位与基准单位的换算系数反推小数位
-            // 例：kg 的 factor=1000，要保留到 0.01g 的精度，需要 0.01/1000 = 0.00001 kg，即 5 位小数
             function getDecimalsForUnit(unit, isWeight) {
                 const factor = getFactor(unit, isWeight);
                 if (!factor || factor <= 0) return 2;
@@ -460,7 +457,6 @@
                 if (defaultVal) select.value = defaultVal;
             }
 
-            // DOM 元素
             const modeBtns = document.querySelectorAll('#modeSwitch .mode-btn');
             const singlePanel = document.getElementById('singlePanel');
             const dualPanel = document.getElementById('dualPanel');
@@ -590,16 +586,13 @@
             });
 
             sSwap.addEventListener('click', () => {
-                // 记录旧状态（旧的输出单位/数值，将作为新方向下的输入）
                 const oldOutputUnit = sOutputUnit.value;
                 const oldOutputVal = sOutputVal.value;
                 const oldInputUnit = sInputUnit.value;
 
-                // 翻转方向（重量→体积 ⇄ 体积→重量），并同步方向按钮的高亮状态
                 singleDir = singleDir === 'weightToVolume' ? 'volumeToWeight' : 'weightToVolume';
                 sDirBtns.forEach(b => b.classList.toggle('active', b.dataset.dir === singleDir));
 
-                // 重新按新方向填充下拉框（此时 sInputUnit/sOutputUnit 的选项类别才会和旧的输出/输入单位匹配）
                 updateSingleUI();
                 if (oldOutputUnit) sInputUnit.value = oldOutputUnit;
                 if (oldInputUnit) sOutputUnit.value = oldInputUnit;
