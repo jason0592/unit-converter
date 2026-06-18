@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>乐普单位换算计算器</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #3b82f6;
+            --primary-soft: #eff6ff;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --radius-lg: 24px;
+            --radius-md: 16px;
+            --radius-sm: 12px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow: 0 4px 12px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.08), 0 4px 6px rgba(0,0,0,0.05);
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(160deg, #f0f4ff 0%, #f9fafb 40%, #f1f5f9 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--card);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            padding: 20px 18px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+
+        /* 头部 */
+        .header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding-bottom: 2px;
+        }
+        .logo-img {
+            height: 44px;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.06));
+        }
+        .app-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -0.2px;
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* 模式切换卡片 */
+        .mode-switch {
+            display: flex;
+            background: #f8fafc;
+            border-radius: var(--radius-md);
+            padding: 5px;
+            gap: 4px;
+            border: 1px solid var(--border-light);
+        }
+        .mode-btn {
+            flex: 1;
+            text-align: center;
+            padding: 10px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            background: transparent;
+            color: var(--text-secondary);
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition);
+            white-space: nowrap;
+            letter-spacing: -0.2px;
+        }
+        .mode-btn.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+        .mode-btn:active {
+            transform: scale(0.97);
+        }
+
+        /* 内容卡片 */
+        .section {
+            background: #ffffff;
+            border: 1px solid #f1f5f9;
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            box-shadow: var(--shadow-sm);
+            transition: all var(--transition);
+        }
+
+        .row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .col {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1;
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.2px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        input,
+        select {
+            font-size: 1rem;
+            padding: 13px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: #fafbfc;
+            outline: none;
+            transition: all var(--transition);
+            color: var(--text);
+            width: 100%;
+            font-weight: 500;
+            -webkit-appearance: none;
+            appearance: none;
+            letter-spacing: -0.2px;
+        }
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 8L1 3h10z' fill='%23475569'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 32px;
+        }
+        input:focus,
+        select:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+            background: white;
+        }
+        input[readonly] {
+            background: #f8fafc;
+            color: var(--text);
+            cursor: default;
+            border-color: #e2e8f0;
+        }
+
+        .btn {
+            padding: 13px 18px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            letter-spacing: -0.2px;
+            white-space: nowrap;
+        }
+        .btn:active {
+            transform: scale(0.97);
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+        }
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+        .btn-outline {
+            background: white;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+        .btn-outline:hover {
+            background: #f8fafc;
+        }
+        .btn-small {
+            padding: 8px 14px;
+            font-size: 0.85rem;
+        }
+
+        .result-box {
+            background: #f0f9ff;
+            border: 1px solid #b6e0fe;
+            border-radius: var(--radius-md);
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            color: #0c4a6e;
+        }
+        .result-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95rem;
+        }
+        .result-highlight {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #0369a1;
+        }
+        .error-msg {
+            color: #b91c1c;
+            background: #fee2e2;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            display: none;
+            font-weight: 500;
+        }
+
+        .ratio-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .ratio-inputs input {
+            width: 70px;
+            text-align: center;
+            font-weight: 600;
+        }
+        .ratio-sep {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+        }
+
+        .small-hint {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: 2px;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #e2e8f0;
+            margin: 2px 0;
+        }
+
+        /* 微交互 */
+        .swap-icon {
+            transition: transform 0.25s ease;
+            cursor: pointer;
+            display: inline-block;
+        }
+        .swap-icon:active {
+            transform: rotate(180deg);
+        }
+
+        @media (max-width: 380px) {
+            .container {
+                padding: 16px 12px 20px;
+            }
+            .btn {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Logo + 名称 -->
+        <div class="header">
+            <img class="logo-img" src="https://md2card.cn/img/screenshots/1781756783204_aiqkck_clipboard-image.png" alt="乐普logo">
+            <div class="app-title">乐普单位换算计算器</div>
+        </div>
+
+        <!-- 模式切换：单组分/双组分 -->
+        <div class="mode-switch" id="modeSwitch">
+            <button class="mode-btn active" data-mode="single">🧪 单组分</button>
+            <button class="mode-btn" data-mode="dual">🧪🧪 双组分</button>
+        </div>
+
+        <!-- 单组分面板 -->
+        <div id="singlePanel" class="section">
+            <div class="col">
+                <label>🧪 胶水密度 (g/cm³)</label>
+                <input type="number" id="sDensity" placeholder="例如 1.12" step="any" min="0.0001" value="1.0">
+            </div>
+            <div class="mode-switch" id="singleDirection">
+                <button class="mode-btn active" data-dir="weightToVolume">重量 → 体积</button>
+                <button class="mode-btn" data-dir="volumeToWeight">体积 → 重量</button>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <label id="sInputLabel">📥 已知重量</label>
+                    <input type="number" id="sInputVal" placeholder="输入数值" step="any" min="0">
+                </div>
+                <div class="col" style="max-width: 110px;">
+                    <label>单位</label>
+                    <select id="sInputUnit"></select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <label id="sOutputLabel">📤 结果（体积）</label>
+                    <input type="text" id="sOutputVal" readonly placeholder="等待计算">
+                </div>
+                <div class="col" style="max-width: 110px;">
+                    <label>单位</label>
+                    <select id="sOutputUnit"></select>
+                </div>
+            </div>
+            <div class="row" style="justify-content: space-between; align-items: center;">
+                <button class="btn btn-outline btn-small" id="sSwapUnits">🔄 交换单位</button>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-outline btn-small" id="sReset">重置</button>
+                    <button class="btn btn-primary" id="sCalc">计算</button>
+                </div>
+            </div>
+            <div class="error-msg" id="sError"></div>
+            <div class="result-box" id="sResultBox" style="display: none;">
+                <div class="result-line"><span>换算结果</span><span class="result-highlight" id="sResultMain"></span></div>
+                <div class="small-hint" id="sResultDetail"></div>
+            </div>
+        </div>
+
+        <!-- 双组分面板 -->
+        <div id="dualPanel" class="section" style="display: none;">
+            <div class="mode-switch" id="dualDirection">
+                <button class="mode-btn active" data-dir="volumeToWeight">体积 → 重量</button>
+                <button class="mode-btn" data-dir="weightToVolume">重量 → 体积</button>
+            </div>
+            <div class="col">
+                <label id="dualInputLabel">📦 总容积</label>
+                <div class="row">
+                    <input type="number" id="dualInputVal" placeholder="输入总容积" step="any" min="0" style="flex:2;">
+                    <select id="dualInputUnit" style="flex:1;"></select>
+                </div>
+            </div>
+            <div class="col">
+                <div class="mode-switch" id="dualRatioType" style="margin-bottom: 2px;">
+                    <button class="mode-btn active" data-ratio="volume">体积比</button>
+                    <button class="mode-btn" data-ratio="weight">重量比</button>
+                </div>
+                <label id="ratioLabel">⚖️ 体积比 (A : B)</label>
+                <div class="ratio-inputs">
+                    <input type="number" id="ratioA" placeholder="A" step="any" min="0.001" value="1">
+                    <span class="ratio-sep">:</span>
+                    <input type="number" id="ratioB" placeholder="B" step="any" min="0.001" value="1">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <label>🧪 密度 A (g/cm³)</label>
+                    <input type="number" id="densityA" placeholder="密度A" step="any" min="0.0001" value="1.0">
+                </div>
+                <div class="col">
+                    <label>🧪 密度 B (g/cm³)</label>
+                    <input type="number" id="densityB" placeholder="密度B" step="any" min="0.0001" value="1.0">
+                </div>
+            </div>
+            <div class="col">
+                <label id="dualOutputLabel">📤 计算结果（重量）</label>
+                <select id="dualOutputUnit" style="margin-bottom: 6px;"></select>
+                <div class="row" style="gap: 10px;">
+                    <button class="btn btn-primary" id="dualCalc" style="flex:1;">计算</button>
+                    <button class="btn btn-outline" id="dualReset" style="flex:1;">重置</button>
+                </div>
+            </div>
+            <div class="error-msg" id="dualError"></div>
+            <div class="result-box" id="dualResultBox" style="display: none;">
+                <div class="result-line"><span>🔹 组分 A 重量</span><span class="result-highlight" id="resA"></span></div>
+                <div class="result-line"><span>🔸 组分 B 重量</span><span class="result-highlight" id="resB"></span></div>
+                <hr>
+                <div class="result-line"><span>📦 总重量</span><span class="result-highlight" id="resTotal"></span></div>
+                <div class="small-hint" id="dualDetail"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const weightUnits = [
+                { name: '毫克 (mg)', value: 'mg', factor: 0.001 },
+                { name: '克 (g)', value: 'g', factor: 1 },
+                { name: '千克 (kg)', value: 'kg', factor: 1000 },
+                { name: '盎司 (oz)', value: 'oz', factor: 28.349523125 },
+                { name: '磅 (lb)', value: 'lb', factor: 453.59237 }
+            ];
+
+            // 根据单位自动计算合适的小数位数：
+            // 基准精度设定为 0.01（克 或 毫升），再按该单位与基准单位的换算系数反推小数位
+            // 例：kg 的 factor=1000，要保留到 0.01g 的精度，需要 0.01/1000 = 0.00001 kg，即 5 位小数
+            function getDecimalsForUnit(unit, isWeight) {
+                const factor = getFactor(unit, isWeight);
+                if (!factor || factor <= 0) return 2;
+                let decimals = Math.round(2 + Math.log10(factor));
+                return Math.max(0, Math.min(6, decimals));
+            }
+
+            function formatNum(num, decimals) {
+                if (!isFinite(num)) return '0';
+                let s = num.toFixed(decimals);
+                if (decimals > 0) s = s.replace(/\.?0+$/, '');
+                return s;
+            }
+            const volumeUnits = [
+                { name: '毫升 (mL)', value: 'mL', factor: 1 },
+                { name: '升 (L)', value: 'L', factor: 1000 },
+                { name: '液盎司 (fl oz)', value: 'floz', factor: 29.5735295625 },
+                { name: '加仑 (gal)', value: 'gal', factor: 3785.411784 },
+                { name: '夸脱 (qt)', value: 'qt', factor: 946.352946 }
+            ];
+
+            function populateSelect(select, units, defaultVal) {
+                select.innerHTML = '';
+                units.forEach(u => {
+                    const opt = document.createElement('option');
+                    opt.value = u.value;
+                    opt.textContent = u.name;
+                    select.appendChild(opt);
+                });
+                if (defaultVal) select.value = defaultVal;
+            }
+
+            // DOM 元素
+            const modeBtns = document.querySelectorAll('#modeSwitch .mode-btn');
+            const singlePanel = document.getElementById('singlePanel');
+            const dualPanel = document.getElementById('dualPanel');
+
+            const sDensity = document.getElementById('sDensity');
+            const sDirBtns = document.querySelectorAll('#singleDirection .mode-btn');
+            const sInputLabel = document.getElementById('sInputLabel');
+            const sOutputLabel = document.getElementById('sOutputLabel');
+            const sInputVal = document.getElementById('sInputVal');
+            const sInputUnit = document.getElementById('sInputUnit');
+            const sOutputVal = document.getElementById('sOutputVal');
+            const sOutputUnit = document.getElementById('sOutputUnit');
+            const sSwap = document.getElementById('sSwapUnits');
+            const sReset = document.getElementById('sReset');
+            const sCalc = document.getElementById('sCalc');
+            const sError = document.getElementById('sError');
+            const sResultBox = document.getElementById('sResultBox');
+            const sResultMain = document.getElementById('sResultMain');
+            const sResultDetail = document.getElementById('sResultDetail');
+
+            let singleDir = 'weightToVolume';
+
+            const dualDirBtns = document.querySelectorAll('#dualDirection .mode-btn');
+            const dualInputLabel = document.getElementById('dualInputLabel');
+            const dualInputVal = document.getElementById('dualInputVal');
+            const dualInputUnit = document.getElementById('dualInputUnit');
+            const ratioLabel = document.getElementById('ratioLabel');
+            const ratioA = document.getElementById('ratioA');
+            const ratioB = document.getElementById('ratioB');
+            const dualRatioBtns = document.querySelectorAll('#dualRatioType .mode-btn');
+            const densityA = document.getElementById('densityA');
+            const densityB = document.getElementById('densityB');
+            const dualOutputLabel = document.getElementById('dualOutputLabel');
+            const dualOutputUnit = document.getElementById('dualOutputUnit');
+            const dualCalc = document.getElementById('dualCalc');
+            const dualReset = document.getElementById('dualReset');
+            const dualError = document.getElementById('dualError');
+            const dualResultBox = document.getElementById('dualResultBox');
+            const resA = document.getElementById('resA');
+            const resB = document.getElementById('resB');
+            const resTotal = document.getElementById('resTotal');
+            const dualDetail = document.getElementById('dualDetail');
+
+            let dualDir = 'volumeToWeight';
+            let dualRatioType = 'volume';
+
+            function switchMode(mode) {
+                if (mode === 'single') {
+                    singlePanel.style.display = 'flex';
+                    dualPanel.style.display = 'none';
+                } else {
+                    singlePanel.style.display = 'none';
+                    dualPanel.style.display = 'flex';
+                    updateDualUI();
+                }
+            }
+
+            modeBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    modeBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    switchMode(this.dataset.mode);
+                });
+            });
+
+            function updateSingleUI() {
+                if (singleDir === 'weightToVolume') {
+                    sInputLabel.textContent = '📥 已知重量';
+                    sOutputLabel.textContent = '📤 结果（体积）';
+                    populateSelect(sInputUnit, weightUnits, 'g');
+                    populateSelect(sOutputUnit, volumeUnits, 'mL');
+                } else {
+                    sInputLabel.textContent = '📥 已知体积';
+                    sOutputLabel.textContent = '📤 结果（重量）';
+                    populateSelect(sInputUnit, volumeUnits, 'mL');
+                    populateSelect(sOutputUnit, weightUnits, 'g');
+                }
+                sInputVal.value = '';
+                sOutputVal.value = '';
+                sResultBox.style.display = 'none';
+                sError.style.display = 'none';
+            }
+
+            sDirBtns.forEach(b => {
+                b.addEventListener('click', function() {
+                    sDirBtns.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    singleDir = this.dataset.dir;
+                    updateSingleUI();
+                });
+            });
+
+            function getFactor(unit, isWeight) {
+                const list = isWeight ? weightUnits : volumeUnits;
+                return list.find(u => u.value === unit)?.factor || 1;
+            }
+
+            sCalc.addEventListener('click', () => {
+                sError.style.display = 'none';
+                sResultBox.style.display = 'none';
+                const density = parseFloat(sDensity.value);
+                if (isNaN(density) || density <= 0) return sError.style.display = 'block', sError.textContent = '请输入有效密度';
+                const inputVal = parseFloat(sInputVal.value);
+                if (isNaN(inputVal) || inputVal < 0) return sError.style.display = 'block', sError.textContent = '请输入有效数值';
+
+                let inFactor, outFactor;
+                if (singleDir === 'weightToVolume') {
+                    inFactor = getFactor(sInputUnit.value, true);
+                    outFactor = getFactor(sOutputUnit.value, false);
+                    const massG = inputVal * inFactor;
+                    const volMl = massG / density;
+                    const decimals = getDecimalsForUnit(sOutputUnit.value, false);
+                    sOutputVal.value = formatNum(volMl / outFactor, decimals);
+                    sResultMain.textContent = sOutputVal.value + ' ' + (sOutputUnit.selectedOptions[0]?.text || '');
+                    sResultDetail.textContent = `${inputVal} ${sInputUnit.selectedOptions[0]?.text} → 体积`;
+                } else {
+                    inFactor = getFactor(sInputUnit.value, false);
+                    outFactor = getFactor(sOutputUnit.value, true);
+                    const volMl = inputVal * inFactor;
+                    const massG = volMl * density;
+                    const decimals = getDecimalsForUnit(sOutputUnit.value, true);
+                    sOutputVal.value = formatNum(massG / outFactor, decimals);
+                    sResultMain.textContent = sOutputVal.value + ' ' + (sOutputUnit.selectedOptions[0]?.text || '');
+                    sResultDetail.textContent = `${inputVal} ${sInputUnit.selectedOptions[0]?.text} → 重量`;
+                }
+                sResultBox.style.display = 'flex';
+            });
+
+            sSwap.addEventListener('click', () => {
+                // 记录旧状态（旧的输出单位/数值，将作为新方向下的输入）
+                const oldOutputUnit = sOutputUnit.value;
+                const oldOutputVal = sOutputVal.value;
+                const oldInputUnit = sInputUnit.value;
+
+                // 翻转方向（重量→体积 ⇄ 体积→重量），并同步方向按钮的高亮状态
+                singleDir = singleDir === 'weightToVolume' ? 'volumeToWeight' : 'weightToVolume';
+                sDirBtns.forEach(b => b.classList.toggle('active', b.dataset.dir === singleDir));
+
+                // 重新按新方向填充下拉框（此时 sInputUnit/sOutputUnit 的选项类别才会和旧的输出/输入单位匹配）
+                updateSingleUI();
+                if (oldOutputUnit) sInputUnit.value = oldOutputUnit;
+                if (oldInputUnit) sOutputUnit.value = oldInputUnit;
+
+                if (oldOutputVal) {
+                    sInputVal.value = oldOutputVal;
+                    sCalc.click();
+                }
+            });
+
+            sReset.addEventListener('click', () => {
+                sDensity.value = '1.0';
+                sInputVal.value = '';
+                sOutputVal.value = '';
+                sError.style.display = 'none';
+                sResultBox.style.display = 'none';
+                updateSingleUI();
+            });
+
+            function updateDualUI() {
+                if (dualDir === 'volumeToWeight') {
+                    dualInputLabel.textContent = '📦 总容积';
+                    populateSelect(dualInputUnit, volumeUnits, 'mL');
+                    dualOutputLabel.textContent = '📤 计算结果（重量）';
+                    populateSelect(dualOutputUnit, weightUnits, 'g');
+                } else {
+                    dualInputLabel.textContent = '⚖️ 总重量';
+                    populateSelect(dualInputUnit, weightUnits, 'g');
+                    dualOutputLabel.textContent = '📤 计算结果（体积）';
+                    populateSelect(dualOutputUnit, volumeUnits, 'mL');
+                }
+                dualInputVal.value = '';
+                dualResultBox.style.display = 'none';
+                dualError.style.display = 'none';
+            }
+
+            function updateRatioTypeUI() {
+                ratioLabel.textContent = dualRatioType === 'volume' ? '⚖️ 体积比 (A : B)' : '⚖️ 重量比 (A : B)';
+            }
+
+            dualDirBtns.forEach(b => {
+                b.addEventListener('click', function() {
+                    dualDirBtns.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    dualDir = this.dataset.dir;
+                    updateDualUI();
+                });
+            });
+
+            dualRatioBtns.forEach(b => {
+                b.addEventListener('click', function() {
+                    dualRatioBtns.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    dualRatioType = this.dataset.ratio;
+                    updateRatioTypeUI();
+                    dualResultBox.style.display = 'none';
+                    dualError.style.display = 'none';
+                });
+            });
+
+            dualCalc.addEventListener('click', () => {
+                dualError.style.display = 'none';
+                dualResultBox.style.display = 'none';
+                const dA = parseFloat(densityA.value);
+                const dB = parseFloat(densityB.value);
+                const rA = parseFloat(ratioA.value);
+                const rB = parseFloat(ratioB.value);
+                const inputVal = parseFloat(dualInputVal.value);
+
+                if (isNaN(dA) || dA <= 0 || isNaN(dB) || dB <= 0) {
+                    return dualError.style.display = 'block', dualError.textContent = '密度必须大于0';
+                }
+                if (isNaN(rA) || rA <= 0 || isNaN(rB) || rB <= 0) {
+                    return dualError.style.display = 'block', dualError.textContent = '比例各项必须大于0';
+                }
+                if (isNaN(inputVal) || inputVal < 0) {
+                    return dualError.style.display = 'block', dualError.textContent = '请输入有效总容积/总重量';
+                }
+
+                const factorIn = getFactor(dualInputUnit.value, dualDir === 'weightToVolume');
+                const factorOut = getFactor(dualOutputUnit.value, dualDir === 'volumeToWeight' ? true : false);
+                let volA, volB, massA, massB, total;
+
+                if (dualDir === 'volumeToWeight' && dualRatioType === 'volume') {
+                    const totalMl = inputVal * factorIn;
+                    volA = totalMl * rA / (rA + rB);
+                    volB = totalMl * rB / (rA + rB);
+                    massA = volA * dA;
+                    massB = volB * dB;
+                    total = massA + massB;
+                    dualDetail.textContent = `组分A体积 ${volA.toFixed(2)} mL, 组分B体积 ${volB.toFixed(2)} mL`;
+                } else if (dualDir === 'volumeToWeight' && dualRatioType === 'weight') {
+                    const totalMl = inputVal * factorIn;
+                    volA = totalMl * (rA * dB) / (rB * dA + rA * dB);
+                    volB = totalMl - volA;
+                    massA = volA * dA;
+                    massB = volB * dB;
+                    total = massA + massB;
+                    dualDetail.textContent = `组分A体积 ${volA.toFixed(2)} mL, 组分B体积 ${volB.toFixed(2)} mL`;
+                } else if (dualDir === 'weightToVolume' && dualRatioType === 'weight') {
+                    const totalG = inputVal * factorIn;
+                    massA = totalG * rA / (rA + rB);
+                    massB = totalG * rB / (rA + rB);
+                    volA = massA / dA;
+                    volB = massB / dB;
+                    total = volA + volB;
+                    dualDetail.textContent = `组分A重量 ${massA.toFixed(2)} g, 组分B重量 ${massB.toFixed(2)} g`;
+                } else if (dualDir === 'weightToVolume' && dualRatioType === 'volume') {
+                    const totalG = inputVal * factorIn;
+                    volA = totalG / (dA + dB * (rB / rA));
+                    volB = volA * (rB / rA);
+                    massA = volA * dA;
+                    massB = volB * dB;
+                    total = volA + volB;
+                    dualDetail.textContent = `组分A重量 ${massA.toFixed(2)} g, 组分B重量 ${massB.toFixed(2)} g`;
+                }
+
+                const outIsWeight = dualDir === 'volumeToWeight';
+                const outDecimals = getDecimalsForUnit(dualOutputUnit.value, outIsWeight);
+                resA.textContent = formatNum((dualDir === 'volumeToWeight' ? massA : volA) / factorOut, outDecimals) + ' ' + (dualOutputUnit.selectedOptions[0]?.text || '');
+                resB.textContent = formatNum((dualDir === 'volumeToWeight' ? massB : volB) / factorOut, outDecimals) + ' ' + (dualOutputUnit.selectedOptions[0]?.text || '');
+                resTotal.textContent = formatNum(total / factorOut, outDecimals) + ' ' + (dualOutputUnit.selectedOptions[0]?.text || '');
+                dualResultBox.style.display = 'flex';
+            });
+
+            dualReset.addEventListener('click', () => {
+                densityA.value = '1.0';
+                densityB.value = '1.0';
+                ratioA.value = '1';
+                ratioB.value = '1';
+                dualInputVal.value = '';
+                dualError.style.display = 'none';
+                dualResultBox.style.display = 'none';
+                dualRatioType = 'volume';
+                dualRatioBtns.forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.dataset.ratio === 'volume') btn.classList.add('active');
+                });
+                updateRatioTypeUI();
+                updateDualUI();
+            });
+
+            updateSingleUI();
+            updateDualUI();
+            updateRatioTypeUI();
+            switchMode('single');
+        })();
+    </script>
+</body>
+</html>
