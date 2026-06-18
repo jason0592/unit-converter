@@ -56,16 +56,15 @@
             border: 1px solid rgba(255,255,255,0.6);
         }
 
-        /* 头部 */
         .header {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 14px; /* 增加了 Logo 和标题的间距 */
+            gap: 14px;
             padding-bottom: 6px;
         }
         .logo-img {
-            height: 48px; /* 放大了 Logo 的高度 */
+            height: 48px;
             object-fit: contain;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.06));
         }
@@ -80,7 +79,6 @@
             background-clip: text;
         }
 
-        /* 模式切换卡片 */
         .mode-switch {
             display: flex;
             background: #f8fafc;
@@ -113,7 +111,6 @@
             transform: scale(0.97);
         }
 
-        /* 内容卡片 */
         .section {
             background: #ffffff;
             border: 1px solid #f1f5f9;
@@ -283,16 +280,6 @@
             margin: 2px 0;
         }
 
-        /* 微交互 */
-        .swap-icon {
-            transition: transform 0.25s ease;
-            cursor: pointer;
-            display: inline-block;
-        }
-        .swap-icon:active {
-            transform: rotate(180deg);
-        }
-
         @media (max-width: 380px) {
             .container {
                 padding: 16px 12px 20px;
@@ -305,13 +292,11 @@
 </head>
 <body>
     <div class="container">
-        <!-- Logo + 名称 -->
         <div class="header">
             <img class="logo-img" src="https://md2card.cn/img/screenshots/1781756783204_aiqkck_clipboard-image.png" alt="乐普logo">
             <div class="app-title">乐普菲克 · 单位换算计算器</div>
         </div>
 
-        <!-- 模式切换：单组分/双组分 -->
         <div class="mode-switch" id="modeSwitch">
             <button class="mode-btn active" data-mode="single">🧪 单组分</button>
             <button class="mode-btn" data-mode="dual">🧪🧪 双组分</button>
@@ -425,19 +410,6 @@
                 { name: '磅 (lb)', value: 'lb', factor: 453.59237 }
             ];
 
-            function getDecimalsForUnit(unit, isWeight) {
-                const factor = getFactor(unit, isWeight);
-                if (!factor || factor <= 0) return 2;
-                let decimals = Math.round(2 + Math.log10(factor));
-                return Math.max(0, Math.min(6, decimals));
-            }
-
-            function formatNum(num, decimals) {
-                if (!isFinite(num)) return '0';
-                let s = num.toFixed(decimals);
-                if (decimals > 0) s = s.replace(/\.?0+$/, '');
-                return s;
-            }
             const volumeUnits = [
                 { name: '毫升 (mL)', value: 'mL', factor: 1 },
                 { name: '升 (L)', value: 'L', factor: 1000 },
@@ -457,6 +429,33 @@
                 if (defaultVal) select.value = defaultVal;
             }
 
+            function getFactor(unit, isWeight) {
+                const list = isWeight ? weightUnits : volumeUnits;
+                return list.find(u => u.value === unit)?.factor || 1;
+            }
+
+            // 根据单位因子智能确定小数位数
+            function getDecimalsForUnit(unit, isWeight) {
+                const factor = getFactor(unit, isWeight);
+                if (!factor || factor <= 0) return 2;
+                let decimals = Math.round(2 + Math.log10(factor));
+                return Math.max(0, Math.min(6, decimals));
+            }
+
+            // 格式化数字，极小值使用科学计数法防止显示为0
+            function formatNum(num, decimals) {
+                if (!isFinite(num)) return '0';
+                if (num === 0) return '0';
+                // 如果绝对值小于10^-decimals，使用科学计数法保留有效数字
+                if (Math.abs(num) < Math.pow(10, -decimals)) {
+                    return num.toExponential(4);
+                }
+                let s = num.toFixed(decimals);
+                s = s.replace(/\.?0+$/, '');
+                return s;
+            }
+
+            // DOM 元素
             const modeBtns = document.querySelectorAll('#modeSwitch .mode-btn');
             const singlePanel = document.getElementById('singlePanel');
             const dualPanel = document.getElementById('dualPanel');
@@ -549,11 +548,6 @@
                 });
             });
 
-            function getFactor(unit, isWeight) {
-                const list = isWeight ? weightUnits : volumeUnits;
-                return list.find(u => u.value === unit)?.factor || 1;
-            }
-
             sCalc.addEventListener('click', () => {
                 sError.style.display = 'none';
                 sResultBox.style.display = 'none';
@@ -585,18 +579,24 @@
                 sResultBox.style.display = 'flex';
             });
 
+            // 交换按钮：切换方向并保留单位与数值
             sSwap.addEventListener('click', () => {
                 const oldOutputUnit = sOutputUnit.value;
                 const oldOutputVal = sOutputVal.value;
                 const oldInputUnit = sInputUnit.value;
 
+                // 反转方向
                 singleDir = singleDir === 'weightToVolume' ? 'volumeToWeight' : 'weightToVolume';
+                // 同步方向按钮高亮
                 sDirBtns.forEach(b => b.classList.toggle('active', b.dataset.dir === singleDir));
 
                 updateSingleUI();
+
+                // 将旧输出单位设为新输入单位
                 if (oldOutputUnit) sInputUnit.value = oldOutputUnit;
                 if (oldInputUnit) sOutputUnit.value = oldInputUnit;
 
+                // 如果之前有计算结果，将其作为新输入值并自动计算
                 if (oldOutputVal) {
                     sInputVal.value = oldOutputVal;
                     sCalc.click();
@@ -609,6 +609,9 @@
                 sOutputVal.value = '';
                 sError.style.display = 'none';
                 sResultBox.style.display = 'none';
+                // 重置方向到默认
+                singleDir = 'weightToVolume';
+                sDirBtns.forEach(b => b.classList.toggle('active', b.dataset.dir === singleDir));
                 updateSingleUI();
             });
 
@@ -732,9 +735,12 @@
                     if (btn.dataset.ratio === 'volume') btn.classList.add('active');
                 });
                 updateRatioTypeUI();
+                dualDir = 'volumeToWeight';
+                dualDirBtns.forEach(b => b.classList.toggle('active', b.dataset.dir === dualDir));
                 updateDualUI();
             });
 
+            // 初始化
             updateSingleUI();
             updateDualUI();
             updateRatioTypeUI();
